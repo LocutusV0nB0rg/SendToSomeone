@@ -1,0 +1,34 @@
+{
+  "manifest_version": 2,
+  "name": "Send To Someone",
+  "description": "Forward emails instantly to preconfigured recipients via the context menu.",
+  "version": "1.2.0",
+  "author": "Leon Breidt",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "send-to-someone@ewv-software.de",
+      "strict_min_version": "115.0"
+    }
+  },
+  "icons": {
+    "32": "icons/icon.svg",
+    "64": "icons/icon.svg"
+  },
+  "permissions": [
+    "menus",
+    "messagesRead",
+    "messagesUpdate",
+    "accountsRead",
+    "compose",
+    "compose.send",
+    "storage",
+    "notifications"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  }
+}

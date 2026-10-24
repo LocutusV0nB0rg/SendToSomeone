@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Send To Someone – Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <h1>Send To Someone</h1>
+
+  <section>
+    <h2>General</h2>
+    <label class="row">
+      <span>Default sender</span>
+      <select id="defaultIdentity"></select>
+    </label>
+    <label class="row">
+      <span>Forward as</span>
+      <select id="forwardType">
+        <option value="forwardInline">Inline</option>
+        <option value="forwardAsAttachment">Attachment</option>
+      </select>
+    </label>
+    <label class="row">
+      <span>Tag after forwarding</span>
+      <select id="tag"></select>
+    </label>
+    <label class="row checkbox">
+      <input type="checkbox" id="reviewBeforeSend">
+      <span>Open the compose window for review instead of sending immediately</span>
+    </label>
+  </section>
+
+  <section>
+    <h2>Recipients</h2>
+    <table id="recipients">
+      <thead>
+        <tr>
+          <th>Name (optional)</th>
+          <th>Email address</th>
+          <th>Sender</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+      <tfoot>
+        <tr>
+          <td><input type="text" id="newLabel" placeholder="e.g. Accounting"></td>
+          <td><input type="email" id="newEmail" placeholder="name@example.com"></td>
+          <td><select id="newIdentity"></select></td>
+          <td><button id="add">Add</button></td>
+        </tr>
+      </tfoot>
+    </table>
+  </section>
+
+  <footer class="savebar">
+    <span id="status" class="status"></span>
+    <button id="discard" disabled>Discard changes</button>
+    <button id="save" class="primary" disabled title="Ctrl+S">Save</button>
+  </footer>
+
+  <script src="options.js"></script>
+</body>
+</html>

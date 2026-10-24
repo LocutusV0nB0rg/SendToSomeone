@@ -1,0 +1,109 @@
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  font: menu;
+  font-size: 14px;
+  max-width: 900px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+h1 {
+  font-size: 1.6em;
+}
+
+h2 {
+  font-size: 1.2em;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  padding-bottom: 4px;
+}
+
+section {
+  margin-bottom: 28px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0;
+}
+
+.row > span:first-child {
+  min-width: 120px;
+}
+
+.row.checkbox > span {
+  min-width: 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  font-weight: 600;
+  padding: 6px 4px;
+}
+
+td {
+  padding: 4px;
+}
+
+tbody tr:nth-child(odd) {
+  background: color-mix(in srgb, currentColor 5%, transparent);
+}
+
+input[type="text"],
+input[type="email"],
+select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px 6px;
+}
+
+.row select {
+  width: auto;
+  min-width: 300px;
+}
+
+td:last-child {
+  width: 1%;
+  white-space: nowrap;
+}
+
+input.invalid {
+  outline: 2px solid #d70022;
+}
+
+.savebar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+  background: Canvas;
+  border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+}
+
+.status {
+  flex: 1;
+}
+
+.status.error {
+  color: #d70022;
+}
+
+button.primary:not(:disabled) {
+  background: #0060df;
+  color: #fff;
+  border: 1px solid #0060df;
+  border-radius: 4px;
+  padding: 4px 16px;
+  font-weight: 600;
+}
