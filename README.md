@@ -163,7 +163,8 @@ Notes:
 ├── icons/
 │   └── icon.svg         Add-on and menu icon
 ├── build.ps1            Packages the add-on into dist/
-└── dist/                Built .xpi packages (generated)
+├── .gitignore           Excludes dist/ from version control
+└── dist/                Built .xpi packages (generated, not versioned)
 ```
 
 ## Development
@@ -190,15 +191,43 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 ```
 
 This creates `dist/send-to-someone-<version>.xpi`, with the version read from `manifest.json`.
-The script uses Windows' own `%SystemRoot%\System32\tar.exe` (bsdtar), because Thunderbird requires
-zip entries with forward slashes, which `Compress-Archive` in Windows PowerShell 5.1 does not produce. Another
-`tar.exe` earlier on the `PATH` (e.g. from WinAVR or Git) would not support creating zip files.
+An existing package with the same version is overwritten. The `dist/` directory is generated and
+excluded from version control via [.gitignore](.gitignore).
+
+### Packaging details
+
+An `.xpi` is a plain **zip** archive with `manifest.json` at its root. The script packages
+`manifest.json`, `background.js`, `icons/` and `options/` — documentation and build files are not included.
+
+The script calls Windows' own `%SystemRoot%\System32\tar.exe` (bsdtar) with `--format zip`:
+
+- **Why `tar.exe` and not `Compress-Archive`?** Thunderbird requires zip entry paths with forward slashes
+  (`options/options.js`); `Compress-Archive` in Windows PowerShell 5.1 writes backslashes.
+- **Why the full path?** Another `tar.exe` earlier on the `PATH` (e.g. from WinAVR or Git) is GNU tar,
+  which cannot create zip files.
+- **Why `--format zip` instead of `-a`?** `-a` selects the format from the file extension and does not know
+  `.xpi`, so it silently falls back to a **tar** archive. Thunderbird rejects such a file as corrupt.
+  Packages built with `-a` (the first builds of 1.0.0 – 1.2.0) were affected.
+
+### Verifying a package
+
+A valid package starts with the zip signature `PK` (`50 4B 03 04`) and lists the expected entries:
+
+```powershell
+$xpi = "dist/send-to-someone-1.2.0.xpi"
+$b = [System.IO.File]::ReadAllBytes($xpi); ($b[0..3] | ForEach-Object { '{0:X2}' -f $_ }) -join ' '
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+[System.IO.Compression.ZipFile]::OpenRead((Resolve-Path $xpi)).Entries.FullName
+```
+
+Expected output: `50 4B 03 04`, followed by `manifest.json`, `background.js`, `icons/icon.svg` and the
+`options/` files. Note that `tar -tf` is **not** a reliable check — it lists both tar and zip archives.
 
 ## Releasing a new version
 
 1. Increase `version` in [manifest.json](manifest.json) — Thunderbird only accepts an update with a higher version.
 2. Update the [Changelog](#changelog) and the version at the top of this file.
-3. Run the build and install the new `.xpi` over the old one to test the update path.
+3. Run the build, [verify the package](#verifying-a-package), and install the new `.xpi` over the old one to test the update path.
 4. If you add permissions, list them in [Permissions](#permissions); users are asked to approve new permissions on update.
 
 ## Troubleshooting
@@ -212,6 +241,7 @@ zip entries with forward slashes, which `Compress-Archive` in Windows PowerShell
 | Wrong sender address | Check the recipient's *Sender* override and the *Default sender* setting. |
 | Tag is not applied | Tags are only added after a successful send, never in review mode. Check that the tag still exists in Thunderbird. |
 | Build fails with `invalid option -- a` | An incompatible `tar.exe` is used; `build.ps1` calls the system one explicitly — make sure you run the current script. |
+| Thunderbird reports the `.xpi` as corrupt or not installable | The package is probably a tar archive from an old build. Rebuild with the current `build.ps1` and [verify the package](#verifying-a-package). |
 
 ## Changelog
 
@@ -219,6 +249,8 @@ zip entries with forward slashes, which `Compress-Archive` in Windows PowerShell
 
 - Optional tag that is added to forwarded messages (existing tags are kept).
 - New permission: `messagesUpdate`.
+- Build: packages are now real zip archives (`tar.exe --format zip`); earlier builds produced tar archives
+  that Thunderbird could not install. `dist/` is excluded via `.gitignore`.
 
 ### 1.1.0
 
