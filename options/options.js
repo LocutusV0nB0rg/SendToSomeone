@@ -69,8 +69,13 @@ function fillIdentitySelect(select, selectedId, defaultLabel) {
   select.value = selectedId || "";
 }
 
+// True when the "new recipient" row has input that was not added via "Add" yet
+function hasPendingRecipient() {
+  return Boolean($("newLabel").value.trim() || $("newEmail").value.trim());
+}
+
 function isDirty() {
-  return JSON.stringify(draft) !== JSON.stringify(saved);
+  return hasPendingRecipient() || JSON.stringify(draft) !== JSON.stringify(saved);
 }
 
 function setStatus(text, isError = false) {
@@ -79,13 +84,16 @@ function setStatus(text, isError = false) {
   status.classList.toggle("error", isError);
 }
 
+const UNSAVED_MESSAGE = "You have unsaved changes.";
+
 function updateSaveState() {
   const dirty = isDirty();
   $("save").disabled = !dirty;
   $("discard").disabled = !dirty;
   if (dirty) {
-    setStatus("You have unsaved changes.");
-  } else if (!$("status").classList.contains("error")) {
+    setStatus(UNSAVED_MESSAGE);
+  } else if ($("status").textContent === UNSAVED_MESSAGE) {
+    // Only clear our own hint; keep "Saved", "Discarded" and error messages
     setStatus("");
   }
 }
@@ -184,13 +192,27 @@ function renderRecipients() {
   });
 }
 
+function clearNewRecipient() {
+  $("newLabel").value = "";
+  $("newEmail").value = "";
+  $("newIdentity").value = "";
+  $("newEmail").classList.remove("invalid");
+}
+
+// Returns false if the "new recipient" row could not be added
 function addRecipient() {
   const label = $("newLabel").value.trim();
   const email = $("newEmail").value.trim();
   if (!EMAIL_PATTERN.test(email)) {
-    setStatus("Please enter a valid email address.", true);
+    setStatus(
+      email
+        ? `"${email}" is not a valid email address.`
+        : "Please enter an email address for the new recipient.",
+      true
+    );
     $("newEmail").classList.add("invalid");
-    return;
+    $("newEmail").focus();
+    return false;
   }
   $("newEmail").classList.remove("invalid");
   setStatus("");
@@ -202,14 +224,19 @@ function addRecipient() {
     ],
   });
 
-  $("newLabel").value = "";
-  $("newEmail").value = "";
-  $("newIdentity").value = "";
+  clearNewRecipient();
   renderRecipients();
   $("newLabel").focus();
+  return true;
 }
 
 async function saveSettings() {
+  // Include a filled-in "new recipient" row even if "Add" was not clicked
+  if (hasPendingRecipient() && !addRecipient()) {
+    setStatus(`Not saved: ${$("status").textContent}`, true);
+    return;
+  }
+
   const invalid = draft.recipients.filter((r) => !EMAIL_PATTERN.test(r.email));
   for (const input of document.querySelectorAll("#recipients tbody input[type=email]")) {
     input.classList.toggle(
@@ -235,6 +262,7 @@ async function saveSettings() {
 
 function discardChanges() {
   draft = structuredClone(saved);
+  clearNewRecipient();
   renderGeneral();
   renderRecipients();
   setStatus("Changes discarded.");
@@ -266,6 +294,11 @@ async function init() {
       if (e.key === "Enter") {
         addRecipient();
       }
+    });
+    $(id).addEventListener("input", () => {
+      $("newEmail").classList.remove("invalid");
+      setStatus("");
+      updateSaveState();
     });
   }
 

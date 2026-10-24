@@ -5,7 +5,7 @@ Right-click one or more messages, choose **Forward to… → _recipient_**, and 
 forwarded and sent immediately — optionally from a specific sender identity and tagged afterwards.
 
 - **Add-on ID:** `send-to-someone@ewv-software.de`
-- **Current version:** 1.2.0
+- **Current version:** 1.3.0
 - **Requires:** Thunderbird 115 or newer (Manifest V2 MailExtension)
 
 ---
@@ -43,7 +43,7 @@ forwarded and sent immediately — optionally from a specific sender identity an
 
 ### From the packaged file
 
-1. Build the package (see [Building](#building)) or take the latest file from `dist/`, e.g. `dist/send-to-someone-1.2.0.xpi`.
+1. Build the package (see [Building](#building)) or take the latest file from `dist/`, e.g. `dist/send-to-someone-1.3.0.xpi`.
 2. In Thunderbird open **☰ → Add-ons and Themes**.
 3. Click the gear icon → **Install Add-on From File…** and select the `.xpi`.
 4. Confirm the permission prompt.
@@ -98,6 +98,12 @@ Each recipient has:
 
 Use **↑ / ↓** to change the order in the context menu and **Remove** to delete a recipient.
 Invalid addresses are outlined in red and block saving until they are fixed.
+
+**Adding:** fill in the empty row at the bottom and click **Add** (or press <kbd>Enter</kbd>). Clicking **Add** is
+optional — when you click **Save** (or press <kbd>Ctrl</kbd>+<kbd>S</kbd>), a filled-in row is added automatically.
+Typing in that row counts as an unsaved change. If the row has a name but no email address, or an invalid one,
+nothing is saved and the email field is outlined in red; fill it in or clear the row. **Discard changes** also
+clears the row.
 
 If a configured identity or tag is later deleted in Thunderbird, the settings page shows it as
 *Unknown identity* / *Unknown tag* rather than silently changing your configuration.
@@ -214,7 +220,7 @@ The script calls Windows' own `%SystemRoot%\System32\tar.exe` (bsdtar) with `--f
 A valid package starts with the zip signature `PK` (`50 4B 03 04`) and lists the expected entries:
 
 ```powershell
-$xpi = "dist/send-to-someone-1.2.0.xpi"
+$xpi = "dist/send-to-someone-1.3.0.xpi"
 $b = [System.IO.File]::ReadAllBytes($xpi); ($b[0..3] | ForEach-Object { '{0:X2}' -f $_ }) -join ' '
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [System.IO.Compression.ZipFile]::OpenRead((Resolve-Path $xpi)).Entries.FullName
@@ -244,6 +250,11 @@ Expected output: `50 4B 03 04`, followed by `manifest.json`, `background.js`, `i
 | Thunderbird reports the `.xpi` as corrupt or not installable | The package is probably a tar archive from an old build. Rebuild with the current `build.ps1` and [verify the package](#verifying-a-package). |
 
 ## Changelog
+
+### 1.3.0
+
+- **Save** also adds a recipient that was filled in but not yet added with **Add**; an incomplete row blocks saving with an error.
+- Fix: the "Saved – changes are active." and "Changes discarded." messages were cleared immediately and never visible.
 
 ### 1.2.0
 

@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Send To Someone",
   "description": "Forward emails instantly to preconfigured recipients via the context menu.",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "author": "Leon Breidt",
   "browser_specific_settings": {
     "gecko": {
